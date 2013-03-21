@@ -1,9 +1,8 @@
 package main
 
 import (
+	"./ircd"
 	"flag"
-	"kevlar/ircd/core"
-	"kevlar/ircd/log"
 	"os"
 )
 
@@ -26,33 +25,33 @@ func main() {
 	if *genconf {
 		conf, err := os.Create(*config)
 		if err != nil {
-			log.Error.Fatalf("Opening config file %q for writing: %s", *config, err)
+			ircd.Error.Fatalf("Opening config file %q for writing: %s", *config, err)
 		}
-		_, err = conf.WriteString(core.DefaultXML)
+		_, err = conf.WriteString(ircd.DefaultXML)
 		if err != nil {
-			log.Error.Fatalf("Writing default configuration to %q: %s", *config, err)
+			ircd.Error.Fatalf("Writing default configuration to %q: %s", *config, err)
 		}
-		log.Info.Printf("Configuration file written to %q", *config)
+		ircd.Info.Printf("Configuration file written to %q", *config)
 		os.Exit(0)
 	}
 
-	if err := log.SetFile(*logfile); err != nil {
-		log.Error.Fatalf("Opening logfile: %s", err)
+	if err := ircd.SetFile(*logfile); err != nil {
+		ircd.Error.Fatalf("Opening logfile: %s", err)
 	}
 	if !*silent {
-		log.ShowInConsole()
+		ircd.ShowInConsole()
 	}
 
-	if err := core.LoadConfigFile(*config); err != nil {
-		log.Error.Fatalf("Loading config: %s", err)
+	if err := ircd.LoadConfigFile(*config); err != nil {
+		ircd.Error.Fatalf("Loading config: %s", err)
 	}
 
 	if *checkconf {
-		if !core.CheckConfig() {
-			log.Error.Fatalf("Invalid configuration")
+		if !ircd.CheckConfig() {
+			ircd.Error.Fatalf("Invalid configuration")
 		}
-		log.Info.Printf("Configuration successfully checked.")
+		ircd.Info.Printf("Configuration successfully checked.")
 	}
 
-	core.Start()
+	ircd.Start()
 }
