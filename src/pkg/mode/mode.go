@@ -1,7 +1,6 @@
 package mode
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -130,7 +129,7 @@ type Mode struct {
 	Args []string
 }
 
-func ParseModeChange(args []string, modes ModeMap) (changes []Mode, errors []os.Error) {
+func ParseModeChange(args []string, modes ModeMap) (changes []Mode, errors []error) {
 	op := QueryMode
 
 	if len(args) == 0 {
@@ -189,7 +188,7 @@ func ParseModeChange(args []string, modes ModeMap) (changes []Mode, errors []os.
 
 type ActiveModes map[int]Mode
 
-func (am ActiveModes) Apply(modes []Mode) (applied []Mode, errors []os.Error) {
+func (am ActiveModes) Apply(modes []Mode) (applied []Mode, errors []error) {
 	// TODO(kevlar): Itarate over UserModes, ChannelModes to ensure stable order
 	for _, m := range modes {
 		char, op, typ := m.Spec.char, m.Op, m.Spec.typ
@@ -207,7 +206,7 @@ func (am ActiveModes) Apply(modes []Mode) (applied []Mode, errors []os.Error) {
 				if !isset {
 					continue
 				}
-				am[char] = Mode{}, false
+				delete(am, char)
 				applied = append(applied, m)
 			}
 		case KeyMode, LimitMode:
@@ -225,7 +224,7 @@ func (am ActiveModes) Apply(modes []Mode) (applied []Mode, errors []os.Error) {
 					errors = append(errors, &UnsetMatchError{char})
 					continue
 				}
-				am[char] = Mode{}, false
+				delete(am, char)
 				applied = append(applied, m)
 			}
 		case StatusMode, ListMode:
@@ -237,13 +236,13 @@ func (am ActiveModes) Apply(modes []Mode) (applied []Mode, errors []os.Error) {
 				if op == SetMode {
 					args[arg] = true
 				} else if op == UnsetMode {
-					args[arg] = false, false
+					delete(args, arg)
 				}
 			}
 			applied = append(applied, m)
 
 			if len(args) == 0 {
-				am[char] = Mode{}, false
+				delete(am, char)
 				continue
 			}
 
@@ -341,6 +340,6 @@ type UnknownModeError struct{ Char int }
 type MissingArgumentError struct{ Char int }
 type UnsetMatchError struct{ Char int }
 
-func (e *UnknownModeError) String() string     { return string(e.Char) + " is an unknown mode to me" }
-func (e *MissingArgumentError) String() string { return string(e.Char) + " requires argument" }
-func (e *UnsetMatchError) String() string      { return "mismatch on unset " + string(e.Char) }
+func (e *UnknownModeError) Error() string     { return string(e.Char) + " is an unknown mode to me" }
+func (e *MissingArgumentError) Error() string { return string(e.Char) + " requires argument" }
+func (e *UnsetMatchError) Error() string      { return "mismatch on unset " + string(e.Char) }

@@ -2,13 +2,13 @@ package main
 
 import (
 	"bytes"
-	"exec"
 	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"runtime"
 )
 

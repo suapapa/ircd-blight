@@ -2,11 +2,11 @@ package core
 
 import (
 	"bytes"
+	"encoding/xml"
+	"errors"
 	"io/ioutil"
-	"os"
 	"strconv"
 	"strings"
-	"xml"
 )
 
 // a Password stores Passwords for Oper and User directives.
@@ -49,12 +49,12 @@ type Ports struct {
 //   6667           // A single port
 //   6666-6669      // A port range
 //   6666-6669,6697 // Comma-separated ranges
-func (p *Ports) GetPortList() (ports []int, err os.Error) {
+func (p *Ports) GetPortList() (ports []int, err error) {
 	ranges := strings.Split(p.PortString, ",")
 	for _, rng := range ranges {
 		extremes := strings.Split(strings.TrimSpace(rng), "-")
 		if len(extremes) > 2 {
-			return nil, os.NewError("Invalid port range: " + rng)
+			return nil, errors.New("Invalid port range: " + rng)
 		}
 		low, err := strconv.Atoi(extremes[0])
 		if err != nil {
@@ -69,7 +69,7 @@ func (p *Ports) GetPortList() (ports []int, err os.Error) {
 			return nil, err
 		}
 		if low > high {
-			return nil, os.NewError("Inverted range: " + rng)
+			return nil, errors.New("Inverted range: " + rng)
 		}
 		for port := low; port <= high; port++ {
 			ports = append(ports, port)
@@ -140,7 +140,7 @@ var Config *Configuration
 
 // LoadConfigFile loads an XML configuration string of the format shown in DefaultXML
 // as the configuration for the server.
-func LoadConfigString(confxml string) os.Error {
+func LoadConfigString(confxml string) error {
 	conf, err := parseXMLConfig([]byte(confxml))
 	if err != nil {
 		return err
@@ -151,7 +151,7 @@ func LoadConfigString(confxml string) os.Error {
 
 // LoadConfigFile loads an XML configuration file of the format shown in DefaultXML
 // as the configuration for the server.
-func LoadConfigFile(filename string) os.Error {
+func LoadConfigFile(filename string) error {
 	confxml, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
@@ -164,9 +164,9 @@ func LoadConfigFile(filename string) os.Error {
 	return nil
 }
 
-func parseXMLConfig(confxml []byte) (conf *Configuration, err os.Error) {
+func parseXMLConfig(confxml []byte) (conf *Configuration, err error) {
 	conf = &Configuration{}
 	buf := bytes.NewBuffer(confxml)
-	err = xml.Unmarshal(buf, conf)
+	err = xml.NewDecoder(buf).Decode(conf)
 	return
 }

@@ -41,10 +41,10 @@ func (c *Core) Get(module, key, defval string) string {
 func (c *Core) Unset(module, key string) {
 	if mod, ok := c.params[module]; ok {
 		if _, ok := mod[key]; ok {
-			mod[key] = "", false
+			delete(mod, key)
 		}
 		if len(mod) == 0 {
-			c.params[module] = nil, false
+			delete(c.params, module)
 		}
 	}
 }
@@ -71,7 +71,7 @@ func (c *Core) Stop() {
 	// Listen on each port
 	for port := range c.ports {
 		c.listener.ClosePort(port)
-		c.ports[port] = false, false
+		delete(c.ports, port)
 	}
 }
 

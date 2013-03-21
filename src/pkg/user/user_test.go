@@ -2,7 +2,6 @@ package user
 
 import (
 	"kevlar/ircd/parser"
-	"os"
 	"testing"
 )
 
@@ -36,7 +35,7 @@ var dummyLower = "{dummy}"
 var dummyMixed = "{dUMmy]"
 var nickSetTests = []struct {
 	Nick  string
-	Error os.Error
+	Error error
 	Count int
 	After string
 }{

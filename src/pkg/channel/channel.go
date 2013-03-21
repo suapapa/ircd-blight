@@ -2,7 +2,6 @@ package channel
 
 import (
 	"kevlar/ircd/parser"
-	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -25,7 +24,7 @@ type Channel struct {
 
 // Get the Channel structure for the given channel.  If it does not exist and
 // create is true, it is created.
-func Get(name string, create bool) (*Channel, os.Error) {
+func Get(name string, create bool) (*Channel, error) {
 	chanMutex.Lock()
 	defer chanMutex.Unlock()
 
@@ -61,7 +60,7 @@ func (c *Channel) Name() string {
 func (c *Channel) TS() string {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
-	return strconv.Itoa64(c.ts / 1e9)
+	return strconv.FormatInt(c.ts/1e9, 10)
 }
 
 // Get the chanel member IDs
@@ -95,7 +94,7 @@ func (c *Channel) OnChan(uid string) (on bool) {
 }
 
 // Join a user to the channel.
-func (c *Channel) Join(uids ...string) (notify []string, err os.Error) {
+func (c *Channel) Join(uids ...string) (notify []string, err error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -106,7 +105,7 @@ func (c *Channel) Join(uids ...string) (notify []string, err os.Error) {
 
 		// TODO(kevlar): Check hostmask
 		c.users[uid] = "host@mask"
-		c.ts = time.Nanoseconds()
+		c.ts = time.Now()
 	}
 
 	notify = make([]string, 0, len(c.users))
@@ -135,7 +134,7 @@ func (c *Channel) Join(uids ...string) (notify []string, err os.Error) {
 // DONE.  Verify?
 
 // Part a user from the channel.
-func (c *Channel) Part(uid string) (notify []string, err os.Error) {
+func (c *Channel) Part(uid string) (notify []string, err error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -147,14 +146,14 @@ func (c *Channel) Part(uid string) (notify []string, err os.Error) {
 	for id := range c.users {
 		notify = append(notify, id)
 	}
-	c.users[uid] = "", false
-	c.ts = time.Nanoseconds()
+	delete(c.users, uid)
+	c.ts = time.Now()
 
 	if len(c.users) == 0 {
 		chanMutex.Lock()
 		defer chanMutex.Unlock()
 
-		chanMap[c.name] = nil, false
+		delete(chanMap, c.name)
 	}
 
 	return
@@ -177,11 +176,11 @@ func PartAll(uid string) (notify map[string][]string) {
 		for id := range c.users {
 			notify[c.name] = append(notify[c.name], id)
 		}
-		c.users[uid] = "", false
-		c.ts = time.Nanoseconds()
+		delete(c.users, uid)
+		c.ts = time.Now()
 
 		if len(c.users) == 0 {
-			chanMap[c.name] = nil, false
+			delete(chanMap, c.name)
 		}
 	}
 
@@ -211,7 +210,7 @@ func Netsplit(sid string, uids []string) map[string][]string {
 		leavingChanUIDs := []string{}
 		for leavingUID := range leaving2notify {
 			leavingChanUIDs = append(leavingChanUIDs, leavingUID)
-			c.users[leavingUID] = "", false
+			delete(c.users, leavingUID)
 		}
 		if len(leavingChanUIDs) == 0 {
 			return
@@ -227,7 +226,7 @@ func Netsplit(sid string, uids []string) map[string][]string {
 		}
 
 		if len(c.users) == 0 {
-			chanMap[c.name] = nil, false
+			delete(chanMap, c.name)
 		}
 	}
 

@@ -52,7 +52,7 @@ func main() {
 				log.Printf("Overwriting numeric %s (%s) with %s", o, numeric, n)
 
 				// Remove the old text mapping
-				name2text[o] = "", false
+				delete(name2text, o)
 			}
 
 			numerics = append(numerics, numeric)

@@ -1,9 +1,9 @@
 package server
 
 import (
+	"errors"
 	"kevlar/ircd/log"
 	"kevlar/ircd/parser"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -89,12 +89,12 @@ func Get(id string, create bool) *Server {
 }
 
 // Link registers a new server linked behind link.
-func Link(link, sid, name, hops, desc string) os.Error {
+func Link(link, sid, name, hops, desc string) error {
 	servMutex.Lock()
 	defer servMutex.Unlock()
 
 	if _, ok := servMap[sid]; ok {
-		return os.NewError("Server already linked: " + sid)
+		return errors.New("Server already linked: " + sid)
 	}
 
 	ihops, _ := strconv.Atoi(hops)
@@ -212,58 +212,58 @@ nextId:
 	return out
 }
 
-func (s *Server) SetType(typ servType) os.Error {
+func (s *Server) SetType(typ servType) error {
 	if s.styp != Unregistered {
-		return os.NewError("Already registered")
+		return errors.New("Already registered")
 	}
 
 	s.styp = typ
 	return nil
 }
 
-func (s *Server) SetPass(password, ts, prefix string) os.Error {
+func (s *Server) SetPass(password, ts, prefix string) error {
 	if len(password) == 0 {
-		return os.NewError("Zero-length password")
+		return errors.New("Zero-length password")
 	}
 
 	if ts != "6" {
-		return os.NewError("TS " + ts + " is unsupported")
+		return errors.New("TS " + ts + " is unsupported")
 	}
 
 	if !parser.ValidServerPrefix(prefix) {
-		return os.NewError("SID " + prefix + " is invalid")
+		return errors.New("SID " + prefix + " is invalid")
 	}
 
 	s.pass, s.sver = password, 6
-	s.ts = time.Nanoseconds()
+	s.ts = time.Now()
 	return nil
 }
 
-func (s *Server) SetCapab(capab string) os.Error {
+func (s *Server) SetCapab(capab string) error {
 	if !strings.Contains(capab, "QS") {
-		return os.NewError("QS CAPAB missing")
+		return errors.New("QS CAPAB missing")
 	}
 
 	if !strings.Contains(capab, "ENCAP") {
-		return os.NewError("ENCAP CAPAB missing")
+		return errors.New("ENCAP CAPAB missing")
 	}
 
 	s.capab = strings.Fields(capab)
-	s.ts = time.Nanoseconds()
+	s.ts = time.Now()
 	return nil
 }
 
-func (s *Server) SetServer(serv, hops string) os.Error {
+func (s *Server) SetServer(serv, hops string) error {
 	if len(serv) == 0 {
-		return os.NewError("Zero-length server name")
+		return errors.New("Zero-length server name")
 	}
 
 	if hops != "1" {
-		return os.NewError("Hops = " + hops + " is unsupported")
+		return errors.New("Hops = " + hops + " is unsupported")
 	}
 
 	s.server, s.hops = serv, 1
-	s.ts = time.Nanoseconds()
+	s.ts = time.Now()
 	return nil
 }
 
@@ -314,18 +314,18 @@ func Unlink(split string) (sids []string) {
 		log.Info.Printf("Split %s: Unlinking %s", split, sid)
 
 		// Delete the server entry
-		servMap[sid] = nil, false
+		delete(servMap, sid)
 
 		// Unlink from the upstream server's downstream list
 		if up, ok := upstream[sid]; ok {
 			// But only if the upstream server is still around
 			if _, ok := downstream[up]; ok {
-				downstream[up][sid] = false, false
+				delete(downstream[up], sid)
 			}
 		}
 
 		// Remove the server's downstream list
-		downstream[sid] = nil, false
+		delete(downstream, sid)
 	}
 
 	return

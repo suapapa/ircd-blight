@@ -1,8 +1,8 @@
 package user
 
 import (
+	"errors"
 	"kevlar/ircd/parser"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -97,7 +97,7 @@ func (u *User) Type() userType {
 func (u *User) TS() string {
 	u.mutex.RLock()
 	defer u.mutex.RUnlock()
-	return strconv.Itoa64(u.ts / 1e9)
+	return strconv.FormatInt(u.ts/1e9, 10)
 }
 
 // Atomically get all of the user's information.
@@ -108,7 +108,7 @@ func (u *User) Info() (nick, user, name string, regType userType) {
 }
 
 // Set the user's nick.
-func (u *User) SetNick(nick string) os.Error {
+func (u *User) SetNick(nick string) error {
 	if !parser.ValidNick(nick) {
 		return parser.NewNumeric(parser.ERR_ERRONEUSNICKNAME, nick)
 	}
@@ -127,18 +127,18 @@ func (u *User) SetNick(nick string) os.Error {
 	userNicks[lownick] = u.ID()
 
 	lownick = parser.ToLower(u.nick)
-	userNicks[lownick] = "", false
+	delete(userNicks, lownick)
 
 	u.mutex.Lock()
 	defer u.mutex.Unlock()
 
 	u.nick = nick
-	u.ts = time.Nanoseconds()
+	u.ts = time.Now()
 	return nil
 }
 
 // Set the user and gecos (immutable once set).
-func (u *User) SetUser(user, name string) os.Error {
+func (u *User) SetUser(user, name string) error {
 	if len(u.user) > 0 {
 		return parser.NewNumeric(parser.ERR_ALREADYREGISTRED)
 	}
@@ -152,17 +152,17 @@ func (u *User) SetUser(user, name string) os.Error {
 	defer u.mutex.Unlock()
 
 	u.user, u.name = user, name
-	u.ts = time.Nanoseconds()
+	u.ts = time.Now()
 	return nil
 }
 
 // Set the user's type (immutable once set).
-func (u *User) SetType(newType userType) os.Error {
+func (u *User) SetType(newType userType) error {
 	if u.utyp != Unregistered {
 		return parser.NewNumeric(parser.ERR_ALREADYREGISTRED)
 	}
 	u.utyp = newType
-	u.ts = time.Nanoseconds()
+	u.ts = time.Now()
 	return nil
 }
 
@@ -186,7 +186,7 @@ func GetInfo(id string) (nick, user, name string, regType userType, ok bool) {
 }
 
 // Get the ID for a particular nick.
-func GetID(nick string) (id string, err os.Error) {
+func GetID(nick string) (id string, err error) {
 	userMutex.RLock()
 	defer userMutex.RUnlock()
 
@@ -235,8 +235,8 @@ func Delete(id string) {
 		defer u.mutex.RUnlock()
 
 		nick := strings.ToLower(u.nick)
-		userNicks[nick] = "", false
-		userMap[id] = nil, false
+		delete(userNicks, nick)
+		delete(userMap, id)
 	}
 }
 
@@ -278,21 +278,21 @@ func Netsplit(sids []string) (splitIDs []string) {
 	return
 }
 
-func Import(uid, nick, user, host, ip, hops, ts, name string) os.Error {
+func Import(uid, nick, user, host, ip, hops, ts, name string) error {
 	userMutex.Lock()
 	defer userMutex.Unlock()
 
 	if _, ok := userMap[uid]; ok {
-		return os.NewError("UID collision")
+		return errors.New("UID collision")
 	}
 
 	lownick := parser.ToLower(nick)
 
 	if _, ok := userNicks[lownick]; ok {
-		return os.NewError("NICK collision")
+		return errors.New("NICK collision")
 	}
 
-	its, _ := strconv.Atoi64(ts)
+	its, _ := strconv.ParseInt(ts, 10, 64)
 	u := &User{
 		mutex: new(sync.RWMutex),
 		ts:    its,

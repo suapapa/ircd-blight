@@ -1,7 +1,6 @@
 package mode
 
 import (
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -11,7 +10,7 @@ var parseModeChangeTests = []struct {
 	ModeSet    ModeMap
 	ModeChange string
 	Parsed     []Mode
-	Errors     []os.Error
+	Errors     []error
 }{
 	{
 		ModeSet:    ChannelModes,

@@ -1,9 +1,9 @@
 package conn
 
 import (
+	"io"
 	"kevlar/ircd/parser"
 	"net"
-	"os"
 	"testing"
 )
 
@@ -12,22 +12,22 @@ type MockConn struct {
 	lastwrite []byte
 }
 
-func (mc *MockConn) LocalAddr() net.Addr                 { return nil }
-func (mc *MockConn) RemoteAddr() net.Addr                { return nil }
-func (mc *MockConn) SetTimeout(nsec int64) os.Error      { return nil }
-func (mc *MockConn) SetReadTimeout(nsec int64) os.Error  { return nil }
-func (mc *MockConn) SetWriteTimeout(nsec int64) os.Error { return nil }
-func (mc *MockConn) Close() os.Error {
+func (mc *MockConn) LocalAddr() net.Addr              { return nil }
+func (mc *MockConn) RemoteAddr() net.Addr             { return nil }
+func (mc *MockConn) SetTimeout(nsec int64) error      { return nil }
+func (mc *MockConn) SetReadTimeout(nsec int64) error  { return nil }
+func (mc *MockConn) SetWriteTimeout(nsec int64) error { return nil }
+func (mc *MockConn) Close() error {
 	mc.data = nil
 	return nil
 }
-func (mc *MockConn) Write(b []byte) (n int, err os.Error) {
+func (mc *MockConn) Write(b []byte) (n int, err error) {
 	mc.lastwrite = b
 	return len(b), nil
 }
-func (mc *MockConn) Read(b []byte) (n int, err os.Error) {
+func (mc *MockConn) Read(b []byte) (n int, err error) {
 	if len(mc.data) <= 0 {
-		err = os.EOF
+		err = io.EOF
 		return
 	}
 	next := mc.data[0]

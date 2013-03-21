@@ -6,7 +6,6 @@ import (
 	"kevlar/ircd/parser"
 	"kevlar/ircd/server"
 	"kevlar/ircd/user"
-	"os"
 	"strings"
 )
 
@@ -29,7 +28,7 @@ var (
 
 // Handle the NICK, USER, SERVER, and PASS messages
 func ConnReg(hook string, msg *parser.Message, ircd *IRCd) {
-	var err os.Error
+	var err error
 	var u *user.User
 	var s *server.Server
 
@@ -84,7 +83,7 @@ func ConnReg(hook string, msg *parser.Message, ircd *IRCd) {
 			default:
 				msg := &parser.Message{
 					Command: parser.CMD_ERROR,
-					Args:    []string{err.String()},
+					Args:    []string{err.Error()},
 					DestIDs: []string{u.ID()},
 				}
 				ircd.ToClient <- msg
@@ -131,7 +130,7 @@ func ConnReg(hook string, msg *parser.Message, ircd *IRCd) {
 			default:
 				msg := &parser.Message{
 					Command: parser.CMD_ERROR,
-					Args:    []string{err.String()},
+					Args:    []string{err.Error()},
 					DestIDs: []string{s.ID()},
 				}
 				ircd.ToServer <- msg
@@ -322,7 +321,7 @@ func Uid(hook string, msg *parser.Message, ircd *IRCd) {
 			Command: parser.CMD_SQUIT,
 			Args: []string{
 				uid,
-				err.String(),
+				err.Error(),
 			},
 			DestIDs: []string{msg.SenderID},
 		}
@@ -347,7 +346,7 @@ func Sid(hook string, msg *parser.Message, ircd *IRCd) {
 			Command: parser.CMD_SQUIT,
 			Args: []string{
 				sid,
-				err.String(),
+				err.Error(),
 			},
 			DestIDs: []string{msg.SenderID},
 		}

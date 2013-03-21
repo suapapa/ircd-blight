@@ -50,7 +50,7 @@ func (l *Listener) AddPort(portno int) {
 				l.Incoming <- NewConn(c)
 			}(conn)
 		}
-		l.ports[portno] = nil, false
+		delete(l.ports, portno)
 	}()
 }
 

@@ -19,14 +19,13 @@ func TestNewListener(t *testing.T) {
 
 func TestAddPort(t *testing.T) {
 	l := NewListener()
-	gcnt := runtime.Goroutines()
+	gcnt := runtime.NumGoroutine()
 	l.AddPort(56561)
 	if 1 != len(l.ports) {
 		t.Errorf("Length of ports array should be 1, got %d", len(l.ports))
 	}
-	if runtime.Gosched(); gcnt >= runtime.Goroutines() {
-		t.Errorf("Expected more than %d goroutines after AddPort, %d running", gcnt,
-			runtime.Goroutines())
+	if runtime.Gosched(); gcnt >= runtime.NumGoroutine() {
+		t.Errorf("Expected more than %d goroutines after AddPort, %d running", gcnt, runtime.NumGoroutine())
 	}
 	if listener, ok := l.ports[56561]; ok {
 		if listener == nil {
@@ -35,21 +34,20 @@ func TestAddPort(t *testing.T) {
 	} else {
 		t.Errorf("Listener should have entry for port 56561, got %v", l.ports)
 	}
-	gcnt = runtime.Goroutines()
+	gcnt = runtime.NumGoroutine()
 	l.Close()
 	if 0 != len(l.ports) {
 		t.Errorf("After Close(), ports should have 0 entries, got %d", len(l.ports))
 	}
-	if runtime.Gosched(); gcnt <= runtime.Goroutines() {
-		t.Errorf("Expected fewer than %d goroutines after Close(), %d running", gcnt,
-			runtime.Goroutines())
+	if runtime.Gosched(); gcnt <= runtime.NumGoroutine() {
+		t.Errorf("Expected fewer than %d goroutines after Close(), %d running", gcnt, runtime.NumGoroutine())
 	}
 }
 
 func TestClosePort(t *testing.T) {
 	l := NewListener()
 	l.AddPort(56561)
-	gcnt := runtime.Goroutines()
+	gcnt := runtime.NumGoroutine()
 	l.ClosePort(56561)
 	// ClosePort is not synchronized, so give it some time (on mac, dialog pops up)
 	for i := 0; i < 100 && 0 != len(l.ports); i++ {
@@ -58,16 +56,14 @@ func TestClosePort(t *testing.T) {
 	if runtime.Gosched(); 0 != len(l.ports) {
 		t.Errorf("After ClosePort(), ports should have 0 entries, got %d", len(l.ports))
 	}
-	if runtime.Gosched(); gcnt <= runtime.Goroutines() {
-		t.Errorf("Expected fewer than %d goroutines after ClosePort(), %d running", gcnt,
-			runtime.Goroutines())
+	if runtime.Gosched(); gcnt <= runtime.NumGoroutine() {
+		t.Errorf("Expected fewer than %d goroutines after ClosePort(), %d running", gcnt, runtime.NumGoroutine())
 	}
 	l.Close()
 	if 0 != len(l.ports) {
 		t.Errorf("After Close(), ports should have 0 entries, got %d", len(l.ports))
 	}
-	if runtime.Gosched(); gcnt <= runtime.Goroutines() {
-		t.Errorf("Expected fewer than %d goroutines after Close(), %d running", gcnt,
-			runtime.Goroutines())
+	if runtime.Gosched(); gcnt <= runtime.NumGoroutine() {
+		t.Errorf("Expected fewer than %d goroutines after Close(), %d running", gcnt, runtime.NumGoroutine())
 	}
 }

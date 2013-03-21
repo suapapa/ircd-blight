@@ -18,7 +18,7 @@ func init() {
 	SetLog(os.Stderr)
 }
 
-func SetFile(filename string) os.Error {
+func SetFile(filename string) error {
 	logfile, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
 	if err != nil {
 		return err

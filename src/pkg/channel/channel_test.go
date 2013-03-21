@@ -3,8 +3,7 @@ package channel
 import (
 	"kevlar/ircd/parser"
 	"kevlar/ircd/user"
-	"os"
-	"rand"
+	"math/rand"
 	"sync"
 	"testing"
 )
@@ -13,7 +12,7 @@ var testJoinPart = []struct {
 	ID      string
 	Command string
 	Channel string
-	Error   os.Error
+	Error   error
 	Chans   int
 	Notify  []string
 }{
@@ -61,7 +60,7 @@ var testJoinPart = []struct {
 
 func TestJoinPartChannel(t *testing.T) {
 	for idx, test := range testJoinPart {
-		var err os.Error
+		var err error
 		var notify []string
 		channel, _ := Get(test.Channel, true)
 		switch test.Command {
@@ -71,7 +70,7 @@ func TestJoinPartChannel(t *testing.T) {
 			notify, err = channel.Part(test.ID)
 		}
 		if got, want := err, test.Error; got != want {
-			if got == nil || want == nil || got.String() != want.String() {
+			if got == nil || want == nil || got.Error() != want.String() {
 				t.Errorf("#%d: %s returned %v, want %v", idx, test.Command, got, want)
 			}
 		}

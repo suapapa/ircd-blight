@@ -67,7 +67,7 @@ func (s *IRCd) manageServers() {
 			if msg.Command == parser.CMD_ERROR {
 				if conn != nil {
 					log.Debug.Printf("{%s} ** Connection terminated remotely", msg.SenderID)
-					sid2conn[msg.SenderID] = nil, false
+					delete(sid2conn, msg.SenderID)
 					conn.UnsubscribeClose(s.serverClosing)
 					conn.Close()
 					if server.IsLocal(msg.SenderID) {
@@ -117,7 +117,7 @@ func (s *IRCd) manageServers() {
 		// Disconnecting servers
 		case closeid := <-s.serverClosing:
 			log.Debug.Printf("{%s} ** Connection closed", closeid)
-			sid2conn[closeid] = nil, false
+			delete(sid2conn, closeid)
 			if server.IsLocal(closeid) {
 				DispatchServer(&parser.Message{
 					SenderID: closeid,
@@ -156,7 +156,7 @@ func (s *IRCd) manageClients() {
 				if conn != nil {
 					log.Debug.Printf("[%s] ** Connection terminated remotely", uid)
 					user.Delete(uid)
-					uid2conn[uid] = nil, false
+					delete(uid2conn, uid)
 					conn.UnsubscribeClose(s.clientClosing)
 					conn.Close()
 				}
@@ -267,7 +267,7 @@ func (s *IRCd) manageClients() {
 				if closeafter {
 					log.Debug.Printf("[%s] ** Connection terminated", id)
 					user.Delete(id)
-					uid2conn[id] = nil, false
+					delete(uid2conn, id)
 					conn.UnsubscribeClose(s.clientClosing)
 					conn.Close()
 				}
@@ -287,7 +287,7 @@ func (s *IRCd) manageClients() {
 		case closeid := <-s.clientClosing:
 			log.Debug.Printf("[%s] ** Connection closed", closeid)
 			user.Delete(closeid)
-			uid2conn[closeid] = nil, false
+			delete(uid2conn, closeid)
 		}
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"kevlar/ircd/user"
 	"log"
 	"net"
-	"os"
 )
 
 type Conn struct {
@@ -14,7 +13,7 @@ type Conn struct {
 	active      bool
 	subscribers map[chan<- *parser.Message]bool
 	onclose     map[chan<- string]bool
-	Error       os.Error
+	Error       error
 	id          string
 	reading     bool
 }
@@ -31,7 +30,7 @@ func NewConn(nc net.Conn) *Conn {
 	return c
 }
 
-func (c *Conn) Close() os.Error {
+func (c *Conn) Close() error {
 	for ch := range c.onclose {
 		ch <- c.id
 	}
@@ -94,11 +93,11 @@ func (c *Conn) SubscribeClose(chn chan<- string) {
 }
 
 func (c *Conn) Unsubscribe(chn chan *parser.Message) {
-	c.subscribers[chn] = false, false
+	delete(c.subscribers, chn)
 }
 
 func (c *Conn) UnsubscribeClose(chn chan<- string) {
-	c.onclose[chn] = false, false
+	delete(c.onclose, chn)
 }
 
 func (c *Conn) SetServer(id string) {
