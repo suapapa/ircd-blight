@@ -1,8 +1,8 @@
 package server
 
 import (
-	"kevlar/ircd/parser"
 	"kevlar/ircd/log"
+	"kevlar/ircd/parser"
 	"os"
 	"strconv"
 	"strings"

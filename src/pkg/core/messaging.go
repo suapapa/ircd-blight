@@ -1,11 +1,11 @@
 package core
 
 import (
-	"kevlar/ircd/parser"
 	"kevlar/ircd/channel"
-	"kevlar/ircd/user"
-	"kevlar/ircd/server"
 	"kevlar/ircd/log"
+	"kevlar/ircd/parser"
+	"kevlar/ircd/server"
+	"kevlar/ircd/user"
 	"strings"
 )
 

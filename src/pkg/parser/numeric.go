@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"strings"
 	"log"
+	"strings"
 )
 
 type Numeric struct {

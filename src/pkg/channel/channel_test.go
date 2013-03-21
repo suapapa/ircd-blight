@@ -3,8 +3,8 @@ package channel
 import (
 	"kevlar/ircd/parser"
 	"kevlar/ircd/user"
-	"rand"
 	"os"
+	"rand"
 	"sync"
 	"testing"
 )

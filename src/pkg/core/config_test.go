@@ -1,8 +1,8 @@
 package core
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 var testDefaultConfig = &Configuration{

@@ -1,8 +1,8 @@
 package core
 
 import (
-	"testing"
 	"kevlar/ircd/parser"
+	"testing"
 )
 
 var registerDispatchMessages = []struct {

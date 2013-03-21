@@ -2,8 +2,8 @@ package channel
 
 import (
 	"bytes"
-	"kevlar/ircd/user"
 	"kevlar/ircd/parser"
+	"kevlar/ircd/user"
 	"log"
 )
 

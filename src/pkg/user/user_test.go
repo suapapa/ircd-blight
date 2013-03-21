@@ -1,9 +1,9 @@
 package user
 
 import (
+	"kevlar/ircd/parser"
 	"os"
 	"testing"
-	"kevlar/ircd/parser"
 )
 
 var testIDs = map[int64]string{

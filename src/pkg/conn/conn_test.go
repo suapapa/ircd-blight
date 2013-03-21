@@ -1,10 +1,10 @@
 package conn
 
 import (
+	"kevlar/ircd/parser"
 	"net"
 	"os"
 	"testing"
-	"kevlar/ircd/parser"
 )
 
 type MockConn struct {

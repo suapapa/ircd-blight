@@ -2,11 +2,11 @@ package conn
 
 import (
 	"bufio"
-	"os"
-	"log"
-	"net"
 	"kevlar/ircd/parser"
 	"kevlar/ircd/user"
+	"log"
+	"net"
+	"os"
 )
 
 type Conn struct {

@@ -1,8 +1,8 @@
 package core
 
 import (
-	"kevlar/ircd/parser"
 	"kevlar/ircd/conn"
+	"kevlar/ircd/parser"
 	"sync"
 )
 
