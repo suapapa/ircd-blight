@@ -96,6 +96,31 @@ type Configuration struct {
 	Operator []*Oper  `json:"operators"`
 }
 
+func (c *Configuration) Check() (okay bool) {
+	okay = true
+
+	// Check hostname: require at least one .
+	if !ValidServerName(c.Name) {
+		Error.Printf("invalid server name %q: must match /\\w+(.\\w+)+/", c.Name)
+		okay = false
+	}
+
+	// Check prefix; [num][alphanum][alphanum]
+	if !ValidServerPrefix(c.SID) {
+		Error.Printf("invalid server [refix %q: must match /[0-9][0-9A-Z]{2}/")
+		okay = false
+	}
+	UserIDPrefix = c.SID
+
+	// Check opers
+	if len(c.Operator) == 0 {
+		Error.Printf("no operators defined: at least one required")
+		okay = false
+	}
+
+	return
+}
+
 // A suitable default configuration which an admin should
 // base his ircd.conf.
 var DefaultConfiguration = Configuration{
@@ -189,4 +214,13 @@ func parseConfig(c []byte) (conf *Configuration, err error) {
 	conf = &Configuration{}
 	err = json.Unmarshal(c, conf)
 	return
+}
+
+func CheckConfig() bool {
+	if Config == nil {
+		Error.Printf("No configuration loaded")
+		return false
+	}
+
+	return Config.Check()
 }
