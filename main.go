@@ -2,6 +2,7 @@ package main
 
 import (
 	"./ircd"
+	"encoding/json"
 	"flag"
 	"os"
 )
@@ -27,8 +28,11 @@ func main() {
 		if err != nil {
 			ircd.Error.Fatalf("Opening config file %q for writing: %s", *config, err)
 		}
-		_, err = conf.WriteString(ircd.DefaultXML)
+		b, err := json.MarshalIndent(ircd.DefaultConfiguration, "", "    ")
 		if err != nil {
+			ircd.Error.Fatalf("Failed to marshal default configuration!: %s", err)
+		}
+		if _, err = conf.Write(b); err != nil {
 			ircd.Error.Fatalf("Writing default configuration to %q: %s", *config, err)
 		}
 		ircd.Info.Printf("Configuration file written to %q", *config)
