@@ -84,7 +84,7 @@ var nickSetTests = []struct {
 
 func TestSetNick(t *testing.T) {
 	// Set up the dummy user
-	dummy := Get(NextUserID())
+	dummy := GetUser(NextUserID())
 	err := dummy.SetNick(dummyNick)
 	if err != nil {
 		t.Fatalf("dummy.SetNick(%s) returned %s", dummyNick, err)
@@ -94,11 +94,11 @@ func TestSetNick(t *testing.T) {
 	}
 
 	// Set up victim user
-	victim := Get(NextUserID())
+	victim := GetUser(NextUserID())
 
 	for idx, test := range nickSetTests {
 		err := victim.SetNick(test.Nick)
-		if got, want := err, test.Error; got != want && got.String() != want.String() {
+		if got, want := err, test.Error; got != want && got != want {
 			t.Errorf("#%d: SetNick(%q) = %#v, want %#v", idx, test.Nick, got, want)
 		}
 		if got, want := len(userNicks), test.Count; got != want {

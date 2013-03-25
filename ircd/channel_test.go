@@ -1,6 +1,7 @@
 package ircd
 
 import (
+	"fmt"
 	"math/rand"
 	"sync"
 	"testing"
@@ -60,7 +61,7 @@ func TestJoinPartChannel(t *testing.T) {
 	for idx, test := range testJoinPart {
 		var err error
 		var notify []string
-		channel, _ := Get(test.Channel, true)
+		channel, _ := GetChannel(test.Channel, true)
 		switch test.Command {
 		case CMD_JOIN:
 			notify, err = channel.Join(test.ID)
@@ -68,7 +69,7 @@ func TestJoinPartChannel(t *testing.T) {
 			notify, err = channel.Part(test.ID)
 		}
 		if got, want := err, test.Error; got != want {
-			if got == nil || want == nil || got.Error() != want.String() {
+			if got == nil || want == nil || got.Error() != fmt.Sprintf("%s", want) {
 				t.Errorf("#%d: %s returned %v, want %v", idx, test.Command, got, want)
 			}
 		}
@@ -104,7 +105,7 @@ func BenchmarkJoin(b *testing.B) {
 		go func(i int) {
 			channame := chans[rand.Intn(len(chans))]
 			userid := users[rand.Intn(len(users))]
-			channel, _ := Get(channame, true)
+			channel, _ := GetChannel(channame, true)
 			channel.Join(userid, "")
 			wg.Done()
 		}(i)

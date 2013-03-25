@@ -4,6 +4,7 @@ import (
 	"io"
 	"net"
 	"testing"
+	"time"
 )
 
 type MockConn struct {
@@ -11,11 +12,14 @@ type MockConn struct {
 	lastwrite []byte
 }
 
-func (mc *MockConn) LocalAddr() net.Addr              { return nil }
-func (mc *MockConn) RemoteAddr() net.Addr             { return nil }
-func (mc *MockConn) SetTimeout(nsec int64) error      { return nil }
-func (mc *MockConn) SetReadTimeout(nsec int64) error  { return nil }
-func (mc *MockConn) SetWriteTimeout(nsec int64) error { return nil }
+func (mc *MockConn) LocalAddr() net.Addr                { return nil }
+func (mc *MockConn) RemoteAddr() net.Addr               { return nil }
+func (mc *MockConn) SetDeadline(t time.Time) error      { return nil }
+func (mc *MockConn) SetTimeout(nsec int64) error        { return nil }
+func (mc *MockConn) SetReadTimeout(nsec int64) error    { return nil }
+func (mc *MockConn) SetReadDeadline(t time.Time) error  { return nil }
+func (mc *MockConn) SetWriteTimeout(nsec int64) error   { return nil }
+func (mc *MockConn) SetWriteDeadline(t time.Time) error { return nil }
 func (mc *MockConn) Close() error {
 	mc.data = nil
 	return nil

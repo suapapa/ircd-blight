@@ -208,13 +208,13 @@ func TestLinking(t *testing.T) {
 	for idx, test := range linkingTests {
 		switch test.Op {
 		case tConnect:
-			Get(test.SID, true)
+			GetServer(test.SID, true)
 		case tLink:
-			s := Get(test.UpSID, true)
+			s := GetServer(test.UpSID, true)
 			if s == nil {
 				t.Errorf("%d. Get(%s) returned nil (should be linked)", idx, test.UpSID)
 			}
-			err := Link(test.UpSID, test.SID, test.SID+"serv", test.Hops, test.SID+"desc")
+			err := LinkServer(test.UpSID, test.SID, test.SID+"serv", test.Hops, test.SID+"desc")
 			if err != nil {
 				t.Errorf("%d. Link(%s to %s) returned %q", idx, test.UpSID, test.SID, err)
 			}
@@ -294,7 +294,7 @@ var linkIterForTests = []struct {
 func TestIter(t *testing.T) {
 	var ch <-chan string
 
-	ch = Iter()
+	ch = ServerIter()
 	for idx, test := range linkIterTest {
 		if got, want := <-ch, test; got != want {
 			t.Errorf("Iter()[%d] = %s, want %s", idx, got, want)

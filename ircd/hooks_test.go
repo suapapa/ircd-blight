@@ -54,7 +54,7 @@ var registerDispatchHooks = []struct {
 	},
 	{
 		Hook:        "test",
-		Mask:        EMAKS_USER | EMAKS_SERVER,
+		Mask:        EMASK_USER | EMASK_SERVER,
 		Constrain:   AnyArgs,
 		Func:        func(string, ExecutionMask, *Message) {},
 		ExpectCalls: 2,
